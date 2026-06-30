@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:#16171a;}
+  body{font-family:Helvetica,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#e7e8ea;}
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:#34383f;border-radius:5px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  button{font-family:inherit;outline:none;}
+  @keyframes sf-spin{to{transform:rotate(360deg);}}
+</style>
+</helmet>
+<div style="height:100vh;display:flex;flex-direction:column;background:#16171a;color:#e7e8ea;overflow:hidden;">
+
+  <header style="display:flex;align-items:center;gap:14px;height:54px;padding:0 16px;background:#1d1f23;border-bottom:1px solid #34383f;flex-shrink:0;z-index:10;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <svg width="26" height="26" viewBox="0 0 32 32" style="display:block;">
+        <polygon points="16,3 28,9.5 16,16 4,9.5" fill="{{ accent }}"></polygon>
+        <polygon points="4,9.5 16,16 16,29 4,22.5" fill="{{ accentDark }}"></polygon>
+        <polygon points="28,9.5 16,16 16,29 28,22.5" fill="{{ accentMid }}"></polygon>
+      </svg>
+      <span style="font-family:'Silkscreen',monospace;font-size:14px;color:#e7e8ea;letter-spacing:.5px;">SKINFORGE</span>
+    </div>
+
+    <div style="width:1px;height:26px;background:#34383f;"></div>
+
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:#6b7178;">New</span>
+      <button onClick="{{ loadClassic }}" style="height:30px;padding:0 11px;border-radius:8px;border:1px solid #34383f;background:#25282d;color:#cdd1d6;font-size:12.5px;cursor:pointer;">Classic</button>
+      <button onClick="{{ loadSlim }}" style="height:30px;padding:0 11px;border-radius:8px;border:1px solid #34383f;background:#25282d;color:#cdd1d6;font-size:12.5px;cursor:pointer;">Slim</button>
+      <button onClick="{{ loadBlank }}" style="height:30px;padding:0 11px;border-radius:8px;border:1px solid #34383f;background:#25282d;color:#cdd1d6;font-size:12.5px;cursor:pointer;">Blank</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:#6b7178;">Rig</span>
+      <div style="display:flex;background:#16171a;border:1px solid #34383f;border-radius:8px;padding:2px;gap:2px;">
+        <button onClick="{{ setModelClassic }}" style="height:26px;padding:0 11px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:12px;{{ modelClassicBtn }}">Classic</button>
+        <button onClick="{{ setModelSlim }}" style="height:26px;padding:0 11px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:12px;{{ modelSlimBtn }}">Slim</button>
+      </div>
+    </div>
+
+    <div style="flex:1;"></div>
+
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button onClick="{{ undo }}" title="Undo (Ctrl+Z)" style="width:34px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid #34383f;background:#25282d;cursor:pointer;color:#cdd1d6;{{ undoBtn }}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"></path><path d="M4 9h11a6 6 0 0 1 0 12h-3"></path></svg>
+      </button>
+      <button onClick="{{ redo }}" title="Redo (Ctrl+Shift+Z)" style="width:34px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid #34383f;background:#25282d;cursor:pointer;color:#cdd1d6;{{ redoBtn }}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"></path><path d="M20 9H9a6 6 0 0 0 0 12h3"></path></svg>
+      </button>
+    </div>
+
+    <div style="width:1px;height:26px;background:#34383f;"></div>
+
+    <div style="display:flex;background:#16171a;border:1px solid #34383f;border-radius:8px;padding:2px;gap:2px;">
+      <button onClick="{{ setLayoutStudio }}" style="height:26px;padding:0 11px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:12px;{{ studioBtn }}">Studio</button>
+      <button onClick="{{ setLayoutCompact }}" style="height:26px;padding:0 11px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:12px;{{ compactBtn }}">Compact</button>
+    </div>
+
+    <button onClick="{{ exportPNG }}" style="display:flex;align-items:center;gap:7px;height:32px;padding:0 14px;border-radius:8px;border:none;background:{{ accent }};color:#0e1410;font-weight:700;font-size:12.5px;cursor:pointer;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+      Export PNG
+    </button>
+  </header>
+
+  <div style="{{ mainStyle }}">
+
+    <aside style="{{ railStyle }}">
+      <button onClick="{{ setPencil }}" title="Pencil (B)" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #34383f;border-radius:10px;cursor:pointer;background:transparent;{{ pencilBtn }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+      </button>
+      <button onClick="{{ setEraser }}" title="Eraser (E)" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #34383f;border-radius:10px;cursor:pointer;background:transparent;{{ eraserBtn }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21 12-12-6-6L3 13a2 2 0 0 0 0 3l4 4Z"></path><path d="M22 21H8"></path></svg>
+      </button>
+      <button onClick="{{ setEyedropper }}" title="Eyedropper (I)" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #34383f;border-radius:10px;cursor:pointer;background:transparent;{{ eyedropperBtn }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 1-4 11-11 3 3L6 21l-4 1Z"></path><path d="m14 6 2-2 4 4-2 2"></path></svg>
+      </button>
+      <div style="{{ dividerStyle }}"></div>
+      <button onClick="{{ toggleMirror }}" title="Mirror L/R (M)" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #34383f;border-radius:10px;cursor:pointer;background:transparent;{{ mirrorBtn }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="m16 8 4 4-4 4"></path><path d="M8 8 4 12l4 4"></path></svg>
+      </button>
+      <button onClick="{{ setRotate }}" title="Orbit tool (R)" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #34383f;border-radius:10px;cursor:pointer;background:transparent;{{ rotateBtn }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v5h-5"></path></svg>
+      </button>
+      <div style="{{ dividerStyle }}"></div>
+      <button onClick="{{ toggleAutoRotate }}" title="Auto-spin" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #34383f;border-radius:10px;cursor:pointer;background:transparent;{{ autoBtn }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12a9.5 9.5 0 0 1 16-7"></path><path d="M21.5 12a9.5 9.5 0 0 1-16 7"></path><path d="M18.5 2v3.5H15"></path><path d="M5.5 22v-3.5H9"></path></svg>
+      </button>
+      <button onClick="{{ resetView }}" title="Reset view" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #34383f;border-radius:10px;cursor:pointer;background:transparent;color:#9aa0a8;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.4 2.6L3 8"></path><path d="M3 3v5h5"></path></svg>
+      </button>
+    </aside>
+
+    <div ref="{{ viewportRef }}" style="flex:1;position:relative;min-width:0;background:radial-gradient(circle at 50% 36%, #23262c 0%, #15161a 72%);overflow:hidden;">
+      <div ref="{{ statusRef }}" style="position:absolute;left:16px;bottom:14px;z-index:4;font-family:'Space Mono',monospace;font-size:11.5px;color:#cdd1d6;background:rgba(22,23,26,.72);backdrop-filter:blur(6px);border:1px solid #34383f;border-radius:8px;padding:6px 11px;pointer-events:none;">Hover the model to paint</div>
+      <div style="position:absolute;right:16px;bottom:14px;z-index:4;font-family:'Space Mono',monospace;font-size:10.5px;color:#6b7178;pointer-events:none;text-align:right;">drag empty space&nbsp;·&nbsp;orbit<br>scroll&nbsp;·&nbsp;zoom</div>
+    </div>
+
+    <aside style="{{ rightStyle }}">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 15px 10px;">
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:#6b7178;">Color</span>
+        <label style="position:relative;display:flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:7px;border:1px solid #34383f;background:#25282d;color:#cdd1d6;font-size:11.5px;cursor:pointer;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"></circle><circle cx="19" cy="13" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="10" cy="20" r="2.5"></circle><path d="M2 12a10 10 0 1 0 10-10c-2 0-3 1-3 2.5S10 9 11 9.5"></path></svg>
+          Custom
+          <input type="color" value="{{ color }}" onChange="{{ onCustomColor }}" style="position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;cursor:pointer;"></input>
+        </label>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:11px;padding:0 15px 12px;">
+        <div style="width:46px;height:46px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:{{ color }};flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.3);"></div>
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:14px;color:#e7e8ea;text-transform:uppercase;">{{ color }}</div>
+          <div style="font-size:11px;color:#6b7178;margin-top:2px;">active brush</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;padding:0 15px 14px;">
+        <sc-for list="{{ palette }}" as="sw" hint-placeholder-count="18">
+          <button onClick="{{ sw.onPick }}" title="{{ sw.hex }}" style="aspect-ratio:1;border-radius:6px;border:1px solid rgba(255,255,255,.10);cursor:pointer;background:{{ sw.hex }};padding:0;"></button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ hasRecent }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:0 15px 14px;">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:#6b7178;margin-bottom:7px;">Recent</div>
+          <div style="display:flex;gap:5px;">
+            <sc-for list="{{ recent }}" as="sw" hint-placeholder-count="4">
+              <button onClick="{{ sw.onPick }}" title="{{ sw.hex }}" style="width:24px;height:24px;border-radius:6px;border:1px solid rgba(255,255,255,.10);cursor:pointer;background:{{ sw.hex }};padding:0;"></button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="height:1px;background:#2a2d33;margin:0 0 2px;"></div>
+
+      <div style="padding:14px 15px 8px;">
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:#6b7178;">Layers</span>
+      </div>
+      <div style="padding:0 12px 6px;display:flex;flex-direction:column;gap:5px;">
+        <div style="display:flex;align-items:center;gap:9px;border-radius:9px;padding:8px 10px;{{ overlayRowStyle }}">
+          <button onClick="{{ toggleOverlayVis }}" title="Toggle visibility" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;color:#cdd1d6;opacity:{{ overlayEyeOpacity }};">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+          <button onClick="{{ selectOverlay }}" style="flex:1;text-align:left;border:none;background:transparent;cursor:pointer;color:#e7e8ea;font-size:13px;padding:0;">Overlay <span style="color:#6b7178;font-size:11px;">· hat / jacket</span></button>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;border-radius:9px;padding:8px 10px;{{ baseRowStyle }}">
+          <button onClick="{{ toggleBaseVis }}" title="Toggle visibility" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;color:#cdd1d6;opacity:{{ baseEyeOpacity }};">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+          <button onClick="{{ selectBase }}" style="flex:1;text-align:left;border:none;background:transparent;cursor:pointer;color:#e7e8ea;font-size:13px;padding:0;">Base <span style="color:#6b7178;font-size:11px;">· skin</span></button>
+        </div>
+      </div>
+      <div style="padding:2px 15px 14px;font-size:11px;color:#6b7178;line-height:1.45;">Paint targets the selected layer. The overlay is the outer shell (hat, jacket, sleeves).</div>
+
+      <div style="height:1px;background:#2a2d33;"></div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 15px 9px;">
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:#6b7178;">Parts</span>
+        <div style="display:flex;gap:6px;">
+          <button onClick="{{ showAllParts }}" style="height:24px;padding:0 9px;border-radius:6px;border:1px solid #34383f;background:#25282d;color:#9aa0a8;font-size:11px;cursor:pointer;">All</button>
+          <button onClick="{{ hideAllParts }}" style="height:24px;padding:0 9px;border-radius:6px;border:1px solid #34383f;background:#25282d;color:#9aa0a8;font-size:11px;cursor:pointer;">None</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 15px 8px;">
+        <sc-for list="{{ partRows }}" as="pt" hint-placeholder-count="6">
+          <button onClick="{{ pt.onToggle }}" title="Toggle part visibility" style="display:flex;align-items:center;justify-content:center;height:34px;border-radius:8px;cursor:pointer;font-size:11.5px;{{ pt.style }}">{{ pt.label }}</button>
+        </sc-for>
+      </div>
+      <div style="padding:2px 15px 16px;font-size:11px;color:#6b7178;line-height:1.45;">Hide parts to reach faces tucked behind arms, legs, or the head, then show them again when you're done.</div>
+
+      <div style="height:1px;background:#2a2d33;"></div>
+
+      <div style="padding:14px 15px 9px;">
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:#6b7178;">Texture map</span>
+      </div>
+      <div style="padding:0 15px 18px;">
+        <div style="border-radius:9px;overflow:hidden;border:1px solid #34383f;background-color:#2a2d33;background-image:linear-gradient(45deg,#23262b 25%,transparent 25%),linear-gradient(-45deg,#23262b 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#23262b 75%),linear-gradient(-45deg,transparent 75%,#23262b 75%);background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;">
+          <canvas ref="{{ previewRef }}" width="64" height="64" style="display:block;width:100%;image-rendering:pixelated;"></canvas>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:10.5px;color:#6b7178;margin-top:8px;text-align:right;">64 × 64 px</div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#666b67&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;accentMid&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#6a328f&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;accentDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#3b3f3c&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;defaultLayout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;studio&quot;,&quot;compact&quot;],&quot;default&quot;:&quot;studio&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;autoSpin&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.viewportRef = React.createRef();
+    this.statusRef = React.createRef();
+    this.previewRef = React.createRef();
+
+    this.PALETTE = [
+      '#000000','#3b3b3f','#6b7178','#9aa0a8','#d6d9dd','#ffffff',
+      '#ffd9b3','#f1c27d','#c68642','#8d5524','#5a3a1a','#33241a',
+      '#b3261e','#e2483a','#e07b1a','#e8c41a','#7bbf3a','#3fae5a',
+      '#1f8a5b','#1aa0a0','#2e6fdb','#3a4f8a','#6b46c1','#9d5bd2',
+      '#d96aa0','#7a4a2a','#57c06a','#4fb6d6','#c0552e','#2b6a4a'
+    ];
+    this.PAL = {
+      classic:{skin:'#b58a63',hair:'#3a2718',shirt:'#13a3a3',pants:'#3b3f8c',shoes:'#3a3a42',mouth:'#6f4329',brow:'#2a1b10',nose:'#a07a55',eyeW:'#e2e6e9',eyeC:'#6a52c0'},
+      slim:{skin:'#d6a06a',hair:'#5a3a1e',shirt:'#3f9e57',pants:'#574a8c',shoes:'#2c2722',mouth:'#85583a',brow:'#3a2414',nose:'#bf8e5c',eyeW:'#e2e6e9',eyeC:'#2e7a52'},
+      blank:{skin:'#bd8a5e',hair:'#4a3a2a',shirt:'#6b7178',pants:'#4a4f57',shoes:'#2b2e33',mouth:'#7a5040',brow:'#5a4636',nose:'#a87e54',eyeW:'#dddee2',eyeC:'#555'}
+    };
+
+    this.theta = 0.62; this.phi = 1.22; this.radius = 52;
+    this.lastIdx = -1; this.paintedAny = false;
+    this.stroking = false; this.orbiting = false;
+    this.history = []; this.hidx = -1;
+
+    this.state = {
+      tool:'pencil',
+      color:'#c68642',
+      recent:[],
+      model:'classic',
+      mirror:false,
+      autoRotate: !!props.autoSpin,
+      layout: props.defaultLayout || 'studio',
+      activeLayer:'base',
+      baseVisible:true,
+      overlayVisible:true,
+      parts:{head:true,body:true,rightArm:true,leftArm:true,rightLeg:true,leftLeg:true},
+      canUndo:false,
+      canRedo:false
+    };
+    this.brushColor = this.state.color;
+  }
+
+  componentDidMount(){ this.waitThree(); window.addEventListener('resize', this.onResize); window.addEventListener('keydown', this.onKey); }
+  componentDidUpdate(){
+    if(this.renderer && this.viewportRef.current && this.renderer.domElement.parentNode !== this.viewportRef.current){
+      this.viewportRef.current.appendChild(this.renderer.domElement);
+      this.ensureObserver(); this.resize();
+    }
+    if(this.baseMeshes) this.applyVisibility();
+  }
+  componentWillUnmount(){
+    cancelAnimationFrame(this._raf);
+    if(this._ro) this._ro.disconnect();
+    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('keydown', this.onKey);
+    if(this.renderer) this.renderer.dispose();
+  }
+
+  waitThree = () => { if(window.THREE){ this.initThree(); } else { setTimeout(this.waitThree, 50); } };
+
+  /* ---------- geometry helpers ---------- */
+  partRects(ox,oy,w,h,d){
+    return {
+      top:[ox+d,oy,w,d], bottom:[ox+d+w,oy,w,d],
+      right:[ox,oy+d,d,h], front:[ox+d,oy+d,w,h],
+      left:[ox+d+w,oy+d,d,h], back:[ox+d+w+d,oy+d,w,h]
+    };
+  }
+  faceCorners(x0,x1,y0,y1,z0,z1,R){
+    return [
+      {TL:[x0,y1,z1],TR:[x1,y1,z1],BL:[x0,y0,z1],BR:[x1,y0,z1],normal:[0,0,1],rect:R.front},
+      {TL:[x1,y1,z0],TR:[x0,y1,z0],BL:[x1,y0,z0],BR:[x0,y0,z0],normal:[0,0,-1],rect:R.back},
+      {TL:[x0,y1,z0],TR:[x0,y1,z1],BL:[x0,y0,z0],BR:[x0,y0,z1],normal:[-1,0,0],rect:R.right},
+      {TL:[x1,y1,z1],TR:[x1,y1,z0],BL:[x1,y0,z1],BR:[x1,y0,z0],normal:[1,0,0],rect:R.left},
+      {TL:[x0,y1,z0],TR:[x1,y1,z0],BL:[x0,y1,z1],BR:[x1,y1,z1],normal:[0,1,0],rect:R.top},
+      {TL:[x0,y0,z1],TR:[x1,y0,z1],BL:[x0,y0,z0],BR:[x1,y0,z0],normal:[0,-1,0],rect:R.bottom}
+    ];
+  }
+  bilerp(TL,TR,BL,BR,fx,fy){
+    const t=[TL[0]+(TR[0]-TL[0])*fx,TL[1]+(TR[1]-TL[1])*fx,TL[2]+(TR[2]-TL[2])*fx];
+    const b=[BL[0]+(BR[0]-BL[0])*fx,BL[1]+(BR[1]-BL[1])*fx,BL[2]+(BR[2]-BL[2])*fx];
+    return [t[0]+(b[0]-t[0])*fy,t[1]+(b[1]-t[1])*fy,t[2]+(b[2]-t[2])*fy];
+  }
+  qkey(p){ return Math.round(p[0]*4)+','+Math.round(p[1]*4)+','+Math.round(p[2]*4); }
+
+  basePartsFor(model){
+    const aw = model==='slim'?3:4; const ax = 4+aw/2;
+    return [
+      {name:'head',pos:[0,28,0],size:[8,8,8],uv:[0,0]},
+      {name:'body',pos:[0,18,0],size:[8,12,4],uv:[16,16]},
+      {name:'rightArm',pos:[-ax,18,0],size:[aw,12,4],uv:[40,16]},
+      {name:'leftArm',pos:[ax,18,0],size:[aw,12,4],uv:[32,48]},
+      {name:'rightLeg',pos:[-2,6,0],size:[4,12,4],uv:[0,16]},
+      {name:'leftLeg',pos:[2,6,0],size:[4,12,4],uv:[16,48]}
+    ];
+  }
+  overlayPartsFor(model){
+    const aw = model==='slim'?3:4; const ax = 4+aw/2;
+    return [
+      {name:'head',pos:[0,28,0],size:[8,8,8],uv:[32,0]},
+      {name:'body',pos:[0,18,0],size:[8,12,4],uv:[16,32]},
+      {name:'rightArm',pos:[-ax,18,0],size:[aw,12,4],uv:[40,32]},
+      {name:'leftArm',pos:[ax,18,0],size:[aw,12,4],uv:[48,48]},
+      {name:'rightLeg',pos:[-2,6,0],size:[4,12,4],uv:[0,32]},
+      {name:'leftLeg',pos:[2,6,0],size:[4,12,4],uv:[0,48]}
+    ];
+  }
+
+  buildGeometry(parts, inflate){
+    const pos=[],uv=[],nor=[],idx=[]; let v=0;
+    for(const part of parts){
+      const [w,h,d]=part.size; const [cx,cy,cz]=part.pos;
+      const R=this.partRects(part.uv[0],part.uv[1],w,h,d);
+      const hw=w/2+inflate, hh=h/2+inflate, hd=d/2+inflate;
+      const faces=this.faceCorners(cx-hw,cx+hw,cy-hh,cy+hh,cz-hd,cz+hd,R);
+      for(const f of faces){
+        pos.push(...f.TL,...f.TR,...f.BL,...f.BR);
+        for(let k=0;k<4;k++) nor.push(...f.normal);
+        const uL=f.rect[0]/64, uR=(f.rect[0]+f.rect[2])/64, vT=1-f.rect[1]/64, vB=1-(f.rect[1]+f.rect[3])/64;
+        uv.push(uL,vT, uR,vT, uL,vB, uR,vB);
+        idx.push(v,v+2,v+1, v+1,v+2,v+3); v+=4;
+      }
+    }
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv,2));
+    g.setAttribute('normal', new THREE.Float32BufferAttribute(nor,3));
+    g.setIndex(idx);
+    return g;
+  }
+
+  buildTexelMap(model){
+    const map=new Array(4096).fill(null);
+    const lists=[[this.basePartsFor(model),0],[this.overlayPartsFor(model),0.5]];
+    for(const [parts,inf] of lists){
+      for(const part of parts){
+        const [w,h,d]=part.size; const [cx,cy,cz]=part.pos;
+        const R=this.partRects(part.uv[0],part.uv[1],w,h,d);
+        const hw=w/2+inf, hh=h/2+inf, hd=d/2+inf;
+        const faces=this.faceCorners(cx-hw,cx+hw,cy-hh,cy+hh,cz-hd,cz+hd,R);
+        for(const f of faces){
+          const r=f.rect;
+          for(let py=r[1];py<r[1]+r[3];py++){
+            for(let px=r[0];px<r[0]+r[2];px++){
+              const fx=(px-r[0]+0.5)/r[2], fy=(py-r[1]+0.5)/r[3];
+              map[py*64+px]=this.bilerp(f.TL,f.TR,f.BL,f.BR,fx,fy);
+            }
+          }
+        }
+      }
+    }
+    const key={};
+    for(let i=0;i<4096;i++){ if(map[i]) key[this.qkey(map[i])]=i; }
+    const mir=new Int32Array(4096).fill(-1);
+    for(let i=0;i<4096;i++){ const p=map[i]; if(!p) continue; const rk=this.qkey([-p[0],p[1],p[2]]); if(key[rk]!==undefined) mir[i]=key[rk]; }
+    this.mirrorMap=mir;
+  }
+
+  /* ---------- starter skins ---------- */
+  fillFace(r,c){ const x=this.texCtx; x.fillStyle=c; x.fillRect(r[0],r[1],r[2],r[3]); }
+  fillSub(r,c0,r0,w,h,c){ const x=this.texCtx; x.fillStyle=c; x.fillRect(r[0]+c0,r[1]+r0,w,h); }
+  shade(hex,f){ const n=parseInt(hex.slice(1),16); const c=v=>Math.max(0,Math.min(255,Math.round(v*f))); const r=c((n>>16)&255),g=c((n>>8)&255),b=c(n&255); return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1); }
+  fillShaded(R,base){ this.fillFace(R.front,base); this.fillFace(R.back,this.shade(base,.86)); this.fillFace(R.left,this.shade(base,.92)); this.fillFace(R.right,this.shade(base,.92)); this.fillFace(R.top,this.shade(base,1.08)); this.fillFace(R.bottom,this.shade(base,.74)); }
+
+  drawStarter(type){
+    const p=this.PAL[type]||this.PAL.classic;
+    const aw = type==='slim'?3:4;
+    this.texCtx.clearRect(0,0,64,64);
+
+    const H=this.partRects(0,0,8,8,8);
+    const B=this.partRects(16,16,8,12,4);
+    const arm=(ox,oy,detail)=>{
+      const A=this.partRects(ox,oy,aw,12,4);
+      this.fillShaded(A,p.skin);
+      if(!detail) return;
+      this.fillFace(A.top,p.shirt);
+      this.fillSub(A.front,0,0,A.front[2],5,p.shirt);
+      this.fillSub(A.back,0,0,A.back[2],5,this.shade(p.shirt,.86));
+      this.fillSub(A.left,0,0,A.left[2],5,this.shade(p.shirt,.92));
+      this.fillSub(A.right,0,0,A.right[2],5,this.shade(p.shirt,.92));
+    };
+    const leg=(ox,oy)=>{
+      const L=this.partRects(ox,oy,4,12,4);
+      this.fillShaded(L,p.pants);
+      this.fillFace(L.bottom,p.shoes);
+      this.fillSub(L.front,0,10,L.front[2],2,p.shoes);
+      this.fillSub(L.back,0,10,L.back[2],2,this.shade(p.shoes,.86));
+      this.fillSub(L.left,0,10,L.left[2],2,this.shade(p.shoes,.92));
+      this.fillSub(L.right,0,10,L.right[2],2,this.shade(p.shoes,.92));
+    };
+
+    if(type==='blank'){
+      this.fillShaded(H,p.skin);
+      this.fillShaded(B,p.shirt);
+      arm(40,16,false); arm(32,48,false);
+      leg(0,16); leg(16,48);
+      return;
+    }
+
+    // HEAD
+    this.fillShaded(H,p.skin);
+    this.fillFace(H.top,p.hair);
+    this.fillFace(H.back,this.shade(p.hair,.9));
+    this.fillSub(H.front,0,0,8,2,p.hair);
+    this.fillSub(H.front,0,2,1,1,p.hair); this.fillSub(H.front,7,2,1,1,p.hair);
+    this.fillSub(H.right,0,0,H.right[2],3,this.shade(p.hair,.92));
+    this.fillSub(H.left,0,0,H.left[2],3,this.shade(p.hair,.92));
+    this.fillSub(H.front,1,2,2,1,p.brow); this.fillSub(H.front,5,2,2,1,p.brow);
+    this.fillSub(H.front,1,3,2,2,p.eyeW); this.fillSub(H.front,5,3,2,2,p.eyeW);
+    this.fillSub(H.front,2,3,1,2,p.eyeC); this.fillSub(H.front,5,3,1,2,p.eyeC);
+    this.fillSub(H.front,3,5,2,1,p.nose);
+    this.fillSub(H.front,2,6,4,1,p.mouth);
+    // BODY
+    this.fillShaded(B,p.shirt);
+    this.fillSub(B.front,0,0,8,1,this.shade(p.shirt,.8));
+    this.fillSub(B.front,0,10,8,2,p.pants);
+    this.fillSub(B.back,0,10,8,2,this.shade(p.pants,.86));
+    this.fillSub(B.left,0,10,B.left[2],2,this.shade(p.pants,.92));
+    this.fillSub(B.right,0,10,B.right[2],2,this.shade(p.pants,.92));
+    // ARMS + LEGS
+    arm(40,16,true); arm(32,48,true);
+    leg(0,16); leg(16,48);
+  }
+
+  /* ---------- three.js ---------- */
+  initThree(){
+    const T=window.THREE;
+    this.texCanvas=document.createElement('canvas'); this.texCanvas.width=64; this.texCanvas.height=64;
+    this.texCtx=this.texCanvas.getContext('2d');
+    this.drawStarter('classic');
+
+    this.scene=new T.Scene();
+    this.camera=new T.PerspectiveCamera(42,1,0.1,2000);
+    this.target=new T.Vector3(0,16,0);
+    this.renderer=new T.WebGLRenderer({antialias:true,alpha:true});
+    this.renderer.setClearColor(0x000000,0);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    if(T.sRGBEncoding!==undefined) this.renderer.outputEncoding=T.sRGBEncoding;
+    const dom=this.renderer.domElement; dom.style.display='block'; dom.style.touchAction='none';
+    this.viewportRef.current.appendChild(dom);
+
+    this.texture=new T.CanvasTexture(this.texCanvas);
+    this.texture.magFilter=T.NearestFilter; this.texture.minFilter=T.NearestFilter;
+    this.texture.generateMipmaps=false;
+    if(T.sRGBEncoding!==undefined) this.texture.encoding=T.sRGBEncoding;
+
+    this.baseMat=new T.MeshStandardMaterial({map:this.texture,roughness:1,metalness:0,side:T.DoubleSide});
+    this.overlayMat=new T.MeshStandardMaterial({map:this.texture,roughness:1,metalness:0,side:T.DoubleSide,transparent:true,alphaTest:0.5});
+
+    this.group=new T.Group(); this.scene.add(this.group);
+    this.buildMeshes();
+
+    this.scene.add(new T.AmbientLight(0xffffff,0.92));
+    const d1=new T.DirectionalLight(0xffffff,0.42); d1.position.set(0.45,1,0.7); this.scene.add(d1);
+    const d2=new T.DirectionalLight(0xffffff,0.22); d2.position.set(-0.6,0.25,-0.55); this.scene.add(d2);
+
+    this.raycaster=new T.Raycaster(); this.mouse=new T.Vector2();
+
+    dom.addEventListener('pointerdown',this.onPointerDown);
+    dom.addEventListener('pointermove',this.onPointerMove);
+    window.addEventListener('pointerup',this.onPointerUp);
+    dom.addEventListener('pointerleave',this.onPointerLeave);
+    dom.addEventListener('wheel',this.onWheel,{passive:false});
+    dom.addEventListener('contextmenu',e=>e.preventDefault());
+
+    this.initHistory(); this.drawPreview();
+    this.ensureObserver(); this.resize(); this.animate();
+  }
+
+  ensureObserver(){
+    if(typeof ResizeObserver==='undefined') return;
+    const el=this.viewportRef.current;
+    if(el===this._observedEl) return;
+    if(this._ro) this._ro.disconnect();
+    this._ro=new ResizeObserver(()=>this.resize());
+    this._ro.observe(el); this._observedEl=el;
+  }
+  onResize=()=>this.resize();
+  resize(){
+    if(!this.renderer||!this.viewportRef.current) return;
+    const el=this.viewportRef.current;
+    const w=el.clientWidth||1, h=el.clientHeight||1;
+    this.renderer.setSize(w,h);
+    this.camera.aspect=w/h; this.camera.updateProjectionMatrix();
+  }
+  updateCamera(){
+    const r=this.radius, t=this.theta, p=this.phi;
+    this.camera.position.set(
+      this.target.x + r*Math.sin(p)*Math.sin(t),
+      this.target.y + r*Math.cos(p),
+      this.target.z + r*Math.sin(p)*Math.cos(t)
+    );
+    this.camera.lookAt(this.target);
+  }
+  animate=()=>{
+    this._raf=requestAnimationFrame(this.animate);
+    if(this.state.autoRotate && !this.orbiting && !this.stroking) this.theta+=0.004;
+    this.updateCamera();
+    this.renderer.render(this.scene,this.camera);
+  };
+
+  /* ---------- pointer / paint ---------- */
+  getHit(e){
+    const rect=this.renderer.domElement.getBoundingClientRect();
+    this.mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
+    this.mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
+    this.raycaster.setFromCamera(this.mouse,this.camera);
+    const dict=this.state.activeLayer==='overlay'?this.overlayMeshes:this.baseMeshes;
+    const meshes=Object.keys(dict).map(k=>dict[k]).filter(me=>me.visible);
+    const hits=this.raycaster.intersectObjects(meshes,false);
+    return hits.length?hits[0]:null;
+  }
+  onPointerDown=(e)=>{
+    if(!this.renderer) return;
+    try{ this.renderer.domElement.setPointerCapture(e.pointerId); }catch(_){}
+    if(this.state.tool==='rotate'||e.button===2||e.button===1){ this.startOrbit(e); return; }
+    const hit=this.getHit(e);
+    if(!hit){ this.startOrbit(e); return; }
+    if(this.state.tool==='eyedropper'){ this.pickColor(hit); return; }
+    this.stroking=true; this.lastIdx=-1; this.paintedAny=false; this.applyHit(hit);
+  };
+  startOrbit(e){ this.orbiting=true; this._lx=e.clientX; this._ly=e.clientY; }
+  onPointerMove=(e)=>{
+    if(!this.renderer) return;
+    if(this.orbiting){
+      const dx=e.clientX-this._lx, dy=e.clientY-this._ly;
+      this.theta -= dx*0.01; this.phi=Math.max(0.18,Math.min(3.0,this.phi-dy*0.01));
+      this._lx=e.clientX; this._ly=e.clientY; return;
+    }
+    if(this.stroking){ const hit=this.getHit(e); if(hit) this.applyHit(hit); }
+    this.updateHover(e);
+  };
+  onPointerUp=()=>{
+    if(this.stroking && this.paintedAny) this.pushHistory();
+    this.stroking=false; this.orbiting=false;
+  };
+  onPointerLeave=()=>{
+    if(this.stroking && this.paintedAny) this.pushHistory();
+    this.stroking=false; this.orbiting=false;
+    if(this.statusRef.current) this.statusRef.current.textContent='Hover the model to paint';
+  };
+  onWheel=(e)=>{ e.preventDefault(); this.radius=Math.max(24,Math.min(120,this.radius*(1+e.deltaY*0.0012))); };
+
+  texelOf(uv){
+    let px=Math.floor(uv.x*64), py=Math.floor((1-uv.y)*64);
+    px=Math.max(0,Math.min(63,px)); py=Math.max(0,Math.min(63,py));
+    return [px,py];
+  }
+  applyHit(hit){
+    const [px,py]=this.texelOf(hit.uv); const idx=py*64+px;
+    if(idx===this.lastIdx) return; this.lastIdx=idx; this.paintedAny=true;
+    this.paintTexel(px,py);
+    if(this.state.mirror){ const m=this.mirrorMap[idx]; if(m>=0) this.paintTexel(m%64,Math.floor(m/64)); }
+    this.texture.needsUpdate=true; this.drawPreview();
+  }
+  paintTexel(px,py){
+    const x=this.texCtx;
+    if(this.state.tool==='eraser'){ x.clearRect(px,py,1,1); }
+    else { x.fillStyle=this.brushColor; x.clearRect(px,py,1,1); x.fillRect(px,py,1,1); }
+  }
+  pickColor(hit){
+    const [px,py]=this.texelOf(hit.uv);
+    const d=this.texCtx.getImageData(px,py,1,1).data;
+    if(d[3]===0) return;
+    const hex='#'+[d[0],d[1],d[2]].map(v=>v.toString(16).padStart(2,'0')).join('');
+    this.setColor(hex);
+  }
+  updateHover(e){
+    if(!this.statusRef.current) return;
+    const hit=this.getHit(e);
+    if(!hit){ this.statusRef.current.textContent='Hover the model to paint'; return; }
+    const [px,py]=this.texelOf(hit.uv);
+    const layer=this.state.activeLayer==='overlay'?'OVERLAY':'BASE';
+    this.statusRef.current.textContent='U '+px+'  V '+py+'   ·   '+layer+(this.state.mirror?'   ·   MIRROR':'');
+  }
+
+  drawPreview(){
+    const c=this.previewRef.current; if(!c) return;
+    const x=c.getContext('2d'); x.imageSmoothingEnabled=false;
+    x.clearRect(0,0,64,64); x.drawImage(this.texCanvas,0,0);
+  }
+
+  /* ---------- history ---------- */
+  initHistory(){ this.history=[this.texCtx.getImageData(0,0,64,64)]; this.hidx=0; this.syncUndo(); }
+  pushHistory(){
+    this.history=this.history.slice(0,this.hidx+1);
+    this.history.push(this.texCtx.getImageData(0,0,64,64));
+    if(this.history.length>60) this.history.shift();
+    this.hidx=this.history.length-1; this.syncUndo();
+  }
+  syncUndo(){ this.setState({canUndo:this.hidx>0,canRedo:this.hidx<this.history.length-1}); }
+  undo=()=>{ if(this.hidx<=0) return; this.hidx--; this.restore(); };
+  redo=()=>{ if(this.hidx>=this.history.length-1) return; this.hidx++; this.restore(); };
+  restore(){ this.texCtx.putImageData(this.history[this.hidx],0,0); this.texture.needsUpdate=true; this.drawPreview(); this.syncUndo(); }
+
+  /* ---------- model / template ---------- */
+  rebuildModel(){ this.buildMeshes(); }
+  buildMeshes(){
+    const T=window.THREE; const m=this.state.model;
+    if(this.baseMeshes) Object.keys(this.baseMeshes).forEach(k=>{ const me=this.baseMeshes[k]; me.geometry.dispose(); this.group.remove(me); });
+    if(this.overlayMeshes) Object.keys(this.overlayMeshes).forEach(k=>{ const me=this.overlayMeshes[k]; me.geometry.dispose(); this.group.remove(me); });
+    this.baseMeshes={}; this.overlayMeshes={};
+    this.basePartsFor(m).forEach(part=>{ const me=new T.Mesh(this.buildGeometry([part],0),this.baseMat); me.userData={part:part.name,layer:'base'}; this.baseMeshes[part.name]=me; this.group.add(me); });
+    this.overlayPartsFor(m).forEach(part=>{ const me=new T.Mesh(this.buildGeometry([part],0.5),this.overlayMat); me.userData={part:part.name,layer:'overlay'}; this.overlayMeshes[part.name]=me; this.group.add(me); });
+    this.buildTexelMap(m);
+    this.applyVisibility();
+  }
+  applyVisibility(){
+    const s=this.state;
+    for(const k in this.baseMeshes){ this.baseMeshes[k].visible = s.baseVisible && s.parts[k]; }
+    for(const k in this.overlayMeshes){ this.overlayMeshes[k].visible = s.overlayVisible && s.parts[k]; }
+  }
+  setModelClassic=()=>{ if(this.state.model!=='classic') this.setState({model:'classic'},()=>this.rebuildModel()); };
+  setModelSlim=()=>{ if(this.state.model!=='slim') this.setState({model:'slim'},()=>this.rebuildModel()); };
+
+  applyTemplate(type,model){
+    this.drawStarter(type); this.texture.needsUpdate=true;
+    this.initHistory(); this.drawPreview();
+    if(model!==this.state.model){ this.setState({model},()=>this.rebuildModel()); }
+  }
+  loadClassic=()=>this.applyTemplate('classic','classic');
+  loadSlim=()=>this.applyTemplate('slim','slim');
+  loadBlank=()=>this.applyTemplate('blank',this.state.model);
+
+  /* ---------- tools / color ---------- */
+  setTool=(t)=>this.setState({tool:t});
+  setPencil=()=>this.setTool('pencil');
+  setEraser=()=>this.setTool('eraser');
+  setEyedropper=()=>this.setTool('eyedropper');
+  setRotate=()=>this.setTool('rotate');
+  toggleMirror=()=>this.setState(s=>({mirror:!s.mirror}));
+  toggleAutoRotate=()=>this.setState(s=>({autoRotate:!s.autoRotate}));
+  resetView=()=>{ this.theta=0.62; this.phi=1.22; this.radius=52; };
+  setColor=(hex)=>{
+    this.brushColor=hex;
+    this.setState(s=>{ const r=[hex,...s.recent.filter(c=>c!==hex)].slice(0,8); return {color:hex,recent:r,tool:s.tool==='eraser'?'pencil':s.tool}; });
+  };
+  onCustomColor=(e)=>this.setColor(e.target.value);
+
+  selectBase=()=>this.setState({activeLayer:'base'});
+  selectOverlay=()=>this.setState({activeLayer:'overlay'});
+  toggleBaseVis=()=>this.setState(s=>{ const v=!s.baseVisible; const ns={baseVisible:v}; if(!v && s.activeLayer==='base' && s.overlayVisible) ns.activeLayer='overlay'; if(v && !s.overlayVisible) ns.activeLayer='base'; return ns; },()=>this.applyVisibility());
+  toggleOverlayVis=()=>this.setState(s=>{ const v=!s.overlayVisible; const ns={overlayVisible:v}; if(!v && s.activeLayer==='overlay' && s.baseVisible) ns.activeLayer='base'; if(v && !s.baseVisible) ns.activeLayer='overlay'; return ns; },()=>this.applyVisibility());
+  togglePart=(name)=>this.setState(s=>({parts:{...s.parts,[name]:!s.parts[name]}}),()=>this.applyVisibility());
+  showAllParts=()=>this.setState({parts:{head:true,body:true,rightArm:true,leftArm:true,rightLeg:true,leftLeg:true}},()=>this.applyVisibility());
+  hideAllParts=()=>this.setState({parts:{head:false,body:false,rightArm:false,leftArm:false,rightLeg:false,leftLeg:false}},()=>this.applyVisibility());
+
+  setLayoutStudio=()=>this.setState({layout:'studio'});
+  setLayoutCompact=()=>this.setState({layout:'compact'});
+
+  exportPNG=()=>{
+    const a=document.createElement('a'); a.download='skin.png';
+    a.href=this.texCanvas.toDataURL('image/png'); a.click();
+  };
+
+  onKey=(e)=>{
+    if(e.target && (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')) return;
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); e.shiftKey?this.redo():this.undo(); return; }
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='y'){ e.preventDefault(); this.redo(); return; }
+    if(e.ctrlKey||e.metaKey) return;
+    const k=e.key.toLowerCase();
+    if(k==='b') this.setPencil(); else if(k==='e') this.setEraser();
+    else if(k==='i') this.setEyedropper(); else if(k==='r') this.setRotate();
+    else if(k==='m') this.toggleMirror();
+  };
+
+  renderVals(){
+    const s=this.state;
+    const accent=this.props.accent || '#57c06a';
+    const accentMid=this.props.accentMid || '#3f9c52';
+    const accentDark=this.props.accentDark || '#2e7a3e';
+    const layout=s.layout || 'studio';
+    const studio=layout==='studio';
+
+    const actv=(on)=> on
+      ? ('background:#2d3137;color:#e7e8ea;box-shadow:inset 0 0 0 1.6px '+accent+';')
+      : 'color:#9aa0a8;';
+    const seg=(on)=> on
+      ? ('background:'+accent+';color:#0e1410;font-weight:700;')
+      : 'color:#9aa0a8;';
+
+    const railStyle = studio
+      ? 'display:flex;flex-direction:column;gap:6px;padding:11px 9px;width:62px;background:#1d1f23;border-right:1px solid #34383f;align-items:center;flex-shrink:0;'
+      : 'position:absolute;z-index:6;top:14px;left:14px;display:flex;flex-direction:row;gap:6px;padding:8px;background:rgba(29,31,35,.88);backdrop-filter:blur(10px);border:1px solid #3a3e45;border-radius:13px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.45);';
+    const rightStyle = studio
+      ? 'display:flex;flex-direction:column;width:274px;background:#1d1f23;border-left:1px solid #34383f;overflow-y:auto;flex-shrink:0;'
+      : 'position:absolute;z-index:6;top:14px;right:14px;width:262px;max-height:calc(100% - 28px);display:flex;flex-direction:column;background:rgba(29,31,35,.93);backdrop-filter:blur(10px);border:1px solid #3a3e45;border-radius:15px;overflow-y:auto;box-shadow:0 14px 36px rgba(0,0,0,.5);';
+    const dividerStyle = studio
+      ? 'width:30px;height:1px;background:#34383f;margin:3px 0;'
+      : 'align-self:stretch;width:1px;min-width:1px;background:#3a3e45;margin:0 1px;';
+
+    const mk=(arr)=>arr.map(h=>({hex:h,onPick:()=>this.setColor(h)}));
+
+    const PARTS=[['head','Head'],['body','Body'],['rightArm','R Arm'],['leftArm','L Arm'],['rightLeg','R Leg'],['leftLeg','L Leg']];
+    const partRows=PARTS.map(pp=>{ const on=s.parts[pp[0]]; return { label:pp[1], onToggle:()=>this.togglePart(pp[0]), style: on?'background:#25282d;color:#cdd1d6;border:1px solid #3a3e45;':'background:#191b1f;color:#5b6168;border:1px dashed #3a3e45;' }; });
+
+    return {
+      viewportRef:this.viewportRef, statusRef:this.statusRef, previewRef:this.previewRef,
+      accent, accentMid, accentDark,
+      color:s.color,
+      palette:mk(this.PALETTE),
+      recent:mk(s.recent),
+      hasRecent:s.recent.length>0,
+      onCustomColor:this.onCustomColor,
+      setPencil:this.setPencil, setEraser:this.setEraser, setEyedropper:this.setEyedropper,
+      setRotate:this.setRotate, toggleMirror:this.toggleMirror, toggleAutoRotate:this.toggleAutoRotate,
+      resetView:this.resetView, undo:this.undo, redo:this.redo, exportPNG:this.exportPNG,
+      setModelClassic:this.setModelClassic, setModelSlim:this.setModelSlim,
+      loadClassic:this.loadClassic, loadSlim:this.loadSlim, loadBlank:this.loadBlank,
+      selectBase:this.selectBase, selectOverlay:this.selectOverlay,
+      toggleBaseVis:this.toggleBaseVis, toggleOverlayVis:this.toggleOverlayVis,
+      togglePart:this.togglePart, showAllParts:this.showAllParts, hideAllParts:this.hideAllParts, partRows,
+      setLayoutStudio:this.setLayoutStudio, setLayoutCompact:this.setLayoutCompact,
+      mainStyle: studio
+        ? 'flex:1;display:flex;min-height:0;'
+        : 'flex:1;position:relative;min-height:0;',
+      railStyle, rightStyle, dividerStyle,
+      pencilBtn:actv(s.tool==='pencil'), eraserBtn:actv(s.tool==='eraser'),
+      eyedropperBtn:actv(s.tool==='eyedropper'), rotateBtn:actv(s.tool==='rotate'),
+      mirrorBtn:actv(s.mirror), autoBtn:actv(s.autoRotate),
+      undoBtn: s.canUndo?'opacity:1;':'opacity:.35;pointer-events:none;',
+      redoBtn: s.canRedo?'opacity:1;':'opacity:.35;pointer-events:none;',
+      modelClassicBtn:seg(s.model==='classic'), modelSlimBtn:seg(s.model==='slim'),
+      studioBtn:seg(studio), compactBtn:seg(!studio),
+      baseRowStyle: s.activeLayer==='base'?('background:#25282d;box-shadow:inset 0 0 0 1.4px '+accent+';'):'background:#202327;',
+      overlayRowStyle: s.activeLayer==='overlay'?('background:#25282d;box-shadow:inset 0 0 0 1.4px '+accent+';'):'background:#202327;',
+      baseEyeOpacity: s.baseVisible?'1':'0.3',
+      overlayEyeOpacity: s.overlayVisible?'1':'0.3'
+    };
+  }
+}
+</script>
+</body>
+</html>
