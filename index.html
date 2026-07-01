@@ -39,11 +39,22 @@
 
     <div style="width:1px;height:26px;background:#34383f;"></div>
 
-    <div style="display:flex;align-items:center;gap:8px;">
+    <div style="display:flex;align-items:center;gap:9px;">
       <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:#6b7178;">New</span>
-      <button onClick="{{ loadClassic }}" style="height:30px;padding:0 11px;border-radius:8px;border:1px solid #34383f;background:#25282d;color:#cdd1d6;font-size:12.5px;cursor:pointer;">Classic</button>
-      <button onClick="{{ loadSlim }}" style="height:30px;padding:0 11px;border-radius:8px;border:1px solid #34383f;background:#25282d;color:#cdd1d6;font-size:12.5px;cursor:pointer;">Slim</button>
-      <button onClick="{{ loadBlank }}" style="height:30px;padding:0 11px;border-radius:8px;border:1px solid #34383f;background:#25282d;color:#cdd1d6;font-size:12.5px;cursor:pointer;">Blank</button>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:#8b9198;">Classic</span>
+        <div style="display:flex;background:#16171a;border:1px solid #34383f;border-radius:8px;padding:2px;gap:2px;">
+          <button onClick="{{ loadClassicMale }}" title="New skin · classic (wide) rig · male" style="height:26px;padding:0 10px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:14px;line-height:1;color:#cdd1d6;">♂</button>
+          <button onClick="{{ loadClassicFemale }}" title="New skin · classic (wide) rig · female" style="height:26px;padding:0 10px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:14px;line-height:1;color:#cdd1d6;">♀</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:#8b9198;">Slim</span>
+        <div style="display:flex;background:#16171a;border:1px solid #34383f;border-radius:8px;padding:2px;gap:2px;">
+          <button onClick="{{ loadSlimMale }}" title="New skin · slim (Alex) rig · male" style="height:26px;padding:0 10px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:14px;line-height:1;color:#cdd1d6;">♂</button>
+          <button onClick="{{ loadSlimFemale }}" title="New skin · slim (Alex) rig · female" style="height:26px;padding:0 10px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:14px;line-height:1;color:#cdd1d6;">♀</button>
+        </div>
+      </div>
     </div>
 
     <div style="display:flex;align-items:center;gap:8px;">
@@ -64,6 +75,10 @@
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"></path><path d="M20 9H9a6 6 0 0 0 0 12h3"></path></svg>
       </button>
     </div>
+
+    <button onClick="{{ toggleBgTheme }}" title="{{ bgToggleTitle }}" style="width:34px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid #34383f;background:#25282d;cursor:pointer;color:#cdd1d6;{{ bgToggleBtn }}">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"></path></svg>
+    </button>
 
     <div style="width:1px;height:26px;background:#34383f;"></div>
 
@@ -101,7 +116,7 @@
       </button>
     </aside>
 
-    <div ref="{{ viewportRef }}" style="flex:1;position:relative;min-width:0;background:radial-gradient(circle at 50% 36%, #23262c 0%, #15161a 72%);overflow:hidden;">
+    <div ref="{{ viewportRef }}" style="flex:1;position:relative;min-width:0;background:{{ viewportBg }};overflow:hidden;">
       <div ref="{{ statusRef }}" style="position:absolute;left:16px;bottom:14px;z-index:4;font-family:'Space Mono',monospace;font-size:11.5px;color:#cdd1d6;background:rgba(22,23,26,.72);backdrop-filter:blur(6px);border:1px solid #34383f;border-radius:8px;padding:6px 11px;pointer-events:none;">Hover the model to paint</div>
       <div style="position:absolute;right:16px;bottom:14px;z-index:4;font-family:'Space Mono',monospace;font-size:10.5px;color:#6b7178;pointer-events:none;text-align:right;">drag empty space&nbsp;·&nbsp;orbit<br>scroll&nbsp;·&nbsp;zoom<br>drop a PNG&nbsp;·&nbsp;import</div>
     </div>
@@ -203,7 +218,7 @@
         <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:#6b7178;">Texture map</span>
       </div>
       <div style="padding:0 15px 18px;">
-        <div style="border-radius:9px;overflow:hidden;border:1px solid #34383f;background-color:#2a2d33;background-image:linear-gradient(45deg,#23262b 25%,transparent 25%),linear-gradient(-45deg,#23262b 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#23262b 75%),linear-gradient(-45deg,transparent 75%,#23262b 75%);background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;">
+        <div style="border-radius:9px;overflow:hidden;border:1px solid #34383f;background-color:{{ checkA }};background-image:linear-gradient(45deg,{{ checkB }} 25%,transparent 25%),linear-gradient(-45deg,{{ checkB }} 25%,transparent 25%),linear-gradient(45deg,transparent 75%,{{ checkB }} 75%),linear-gradient(-45deg,transparent 75%,{{ checkB }} 75%);background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;">
           <canvas ref="{{ previewRef }}" width="64" height="64" style="display:block;width:100%;image-rendering:pixelated;"></canvas>
         </div>
       </div>
@@ -263,7 +278,8 @@ class Component extends DCLogic {
       parts:{head:true,body:true,rightArm:true,leftArm:true,rightLeg:true,leftLeg:true},
       canUndo:false,
       canRedo:false,
-      dragOver:false
+      dragOver:false,
+      lightBg:this.readLightBg()
     };
     this.brushColor = this.state.color;
   }
@@ -418,6 +434,96 @@ class Component extends DCLogic {
     const Q=[[1,[3,4,5]],[2,[2,6]],[3,[6]],[4,[4,5]],[5,[4]],[7,[4]]];
     for(const row of Q){ for(const cx of row[1]) this.fillSub(H.front,cx,row[0],1,1,'#f2f2f4'); }
   }
+
+  // Blank-slate base skin: neutral skin tone, minimal clothes (shorts + a simple
+  // top), differentiated male/female by hair, face and top cut. Ready to customize.
+  drawBase(gender, model){
+    const female = gender==='female';
+    const aw = model==='slim'?3:4;
+    const x=this.texCtx; x.clearRect(0,0,64,64);
+    const skin='#d7ad86', hair=female?'#5a3a20':'#33241a';
+    const top='#c3c8cf', shorts='#5f6570';
+    const sh=(c,f)=>this.shade(c,f);
+
+    const H=this.partRects(0,0,8,8,8);
+    const B=this.partRects(16,16,8,12,4);
+    const RA=this.partRects(40,16,aw,12,4), LA=this.partRects(32,48,aw,12,4);
+    const RL=this.partRects(0,16,4,12,4),  LL=this.partRects(16,48,4,12,4);
+
+    // HEAD — skin, hair, face
+    this.fillShaded(H,skin);
+    this.fillFace(H.top,hair); this.fillFace(H.back,sh(hair,.9));
+    this.fillSub(H.front,0,0,8,2,hair);
+    this.fillSub(H.front,0,2,1,1,hair); this.fillSub(H.front,7,2,1,1,hair);
+    if(female){
+      // long hair: down the sides and framing the face
+      this.fillSub(H.right,0,0,8,8,sh(hair,.92)); this.fillSub(H.left,0,0,8,8,sh(hair,.92));
+      this.fillSub(H.front,0,2,1,6,hair); this.fillSub(H.front,7,2,1,6,hair);
+    } else {
+      this.fillSub(H.right,0,0,8,3,sh(hair,.92)); this.fillSub(H.left,0,0,8,3,sh(hair,.92));
+    }
+    // face
+    const brow=sh(hair,.8);
+    this.fillSub(H.front,1,2,2,1,brow); this.fillSub(H.front,5,2,2,1,brow);
+    this.fillSub(H.front,1,3,2,2,'#e6e9ec'); this.fillSub(H.front,5,3,2,2,'#e6e9ec');
+    const eye=female?'#6a4a8a':'#4a3320';
+    this.fillSub(H.front,2,3,1,2,eye); this.fillSub(H.front,5,3,1,2,eye);
+    if(female){ this.fillSub(H.front,1,3,1,1,'#2a1b10'); this.fillSub(H.front,6,3,1,1,'#2a1b10'); }
+    this.fillSub(H.front,3,5,2,1,sh(skin,.82)); // nose
+    this.fillSub(H.front,2,6,4,1,female?'#b5615f':sh(skin,.7)); // mouth / lips
+
+    // BODY — skin, then top and shorts
+    this.fillShaded(B,skin);
+    if(female){
+      // tank top: torso covered, thin shoulder straps
+      this.fillSub(B.front,0,2,8,10,top);
+      this.fillSub(B.front,1,0,1,2,top); this.fillSub(B.front,6,0,1,2,top);
+      this.fillSub(B.back,0,0,8,12,sh(top,.86));
+      this.fillSub(B.left,0,0,4,12,sh(top,.92)); this.fillSub(B.right,0,0,4,12,sh(top,.92));
+      this.fillSub(B.front,1,4,2,1,sh(top,1.07)); this.fillSub(B.front,5,4,2,1,sh(top,1.07)); // subtle form
+      this.fillSub(B.front,2,5,1,1,sh(top,.9)); this.fillSub(B.front,5,5,1,1,sh(top,.9));
+    } else {
+      this.fillFace(B.front,top); this.fillFace(B.back,sh(top,.86));
+      this.fillFace(B.left,sh(top,.92)); this.fillFace(B.right,sh(top,.92));
+      this.fillSub(B.front,1,3,2,1,sh(top,.9)); this.fillSub(B.front,5,3,2,1,sh(top,.9)); // faint chest line
+    }
+    // shorts (waistband over lower torso)
+    this.fillSub(B.front,0,9,8,3,shorts); this.fillSub(B.back,0,9,8,3,sh(shorts,.86));
+    this.fillSub(B.left,0,9,4,3,sh(shorts,.92)); this.fillSub(B.right,0,9,4,3,sh(shorts,.92));
+
+    // ARMS — skin; male tee adds a short sleeve cap
+    const arm=(A)=>{
+      this.fillShaded(A,skin);
+      if(!female){
+        this.fillFace(A.top,top);
+        this.fillSub(A.front,0,0,A.front[2],3,top);
+        this.fillSub(A.back,0,0,A.back[2],3,sh(top,.86));
+        this.fillSub(A.left,0,0,A.left[2],3,sh(top,.92));
+        this.fillSub(A.right,0,0,A.right[2],3,sh(top,.92));
+      }
+    };
+    arm(RA); arm(LA);
+
+    // LEGS — skin, shorts over the upper leg, hint of foot at the base
+    const leg=(L)=>{
+      this.fillShaded(L,skin);
+      this.fillSub(L.front,0,0,4,4,shorts); this.fillSub(L.back,0,0,4,4,sh(shorts,.86));
+      this.fillSub(L.left,0,0,4,4,sh(shorts,.92)); this.fillSub(L.right,0,0,4,4,sh(shorts,.92));
+      this.fillFace(L.bottom,sh(skin,.78));
+    };
+    leg(RL); leg(LL);
+  }
+
+  applyBase(gender, model){
+    this.drawBase(gender, model);
+    this.texture.needsUpdate=true;
+    this.initHistory(); this.drawPreview();
+    if(model!==this.state.model){ this.setState({model},()=>this.rebuildModel()); }
+  }
+  loadClassicMale=()=>this.applyBase('male','classic');
+  loadClassicFemale=()=>this.applyBase('female','classic');
+  loadSlimMale=()=>this.applyBase('male','slim');
+  loadSlimFemale=()=>this.applyBase('female','slim');
 
   drawStarter(type){
     const p=this.PAL[type]||this.PAL.classic;
@@ -687,6 +793,8 @@ class Component extends DCLogic {
   setRotate=()=>this.setTool('rotate');
   toggleMirror=()=>this.setState(s=>({mirror:!s.mirror}));
   toggleAutoRotate=()=>this.setState(s=>({autoRotate:!s.autoRotate}));
+  readLightBg(){ try{ return localStorage.getItem('sf_lightBg')==='1'; }catch(_){ return false; } }
+  toggleBgTheme=()=>this.setState(s=>{ const v=!s.lightBg; try{ localStorage.setItem('sf_lightBg', v?'1':'0'); }catch(_){} return {lightBg:v}; });
   resetView=()=>{ this.theta=0.62; this.phi=1.22; this.radius=52; };
   setColor=(hex)=>{
     this.brushColor=hex;
@@ -836,6 +944,15 @@ class Component extends DCLogic {
       : 'background:rgba(255,255,255,.02);border:1.5px dashed #3a3e45;opacity:.45;';
     const pf=(name,label)=>{ const on=s.parts[name]; return { onToggle:()=>this.togglePart(name), style:pfStyle(on), title:label+(on?' — shown (click to hide)':' — hidden (click to show)') }; };
 
+    const lightBg=s.lightBg;
+    const viewportBg = lightBg
+      ? 'radial-gradient(circle at 50% 36%, #c6cad1 0%, #a4a9b2 74%)'
+      : 'radial-gradient(circle at 50% 36%, #23262c 0%, #15161a 72%)';
+    const checkA = lightBg ? '#b9bdc4' : '#2a2d33';
+    const checkB = lightBg ? '#aaaeb6' : '#23262b';
+    const bgToggleBtn = lightBg ? ('background:#2d3137;color:#e7e8ea;box-shadow:inset 0 0 0 1.6px '+accent+';') : '';
+    const bgToggleTitle = lightBg ? 'Editing background: light — click for dark' : 'Editing background: dark — click for light';
+
     return {
       viewportRef:this.viewportRef, statusRef:this.statusRef, previewRef:this.previewRef,
       accent, accentMid, accentDark,
@@ -849,8 +966,10 @@ class Component extends DCLogic {
       resetView:this.resetView, undo:this.undo, redo:this.redo, exportPNG:this.exportPNG,
       importRef:this.importRef, importSkin:this.importSkin, onImportFile:this.onImportFile,
       dragOver:s.dragOver,
+      toggleBgTheme:this.toggleBgTheme, viewportBg, checkA, checkB, bgToggleBtn, bgToggleTitle,
       setModelClassic:this.setModelClassic, setModelSlim:this.setModelSlim,
-      loadClassic:this.loadClassic, loadSlim:this.loadSlim, loadBlank:this.loadBlank,
+      loadClassicMale:this.loadClassicMale, loadClassicFemale:this.loadClassicFemale,
+      loadSlimMale:this.loadSlimMale, loadSlimFemale:this.loadSlimFemale,
       selectBase:this.selectBase, selectOverlay:this.selectOverlay,
       toggleBaseVis:this.toggleBaseVis, toggleOverlayVis:this.toggleOverlayVis,
       togglePart:this.togglePart, showAllParts:this.showAllParts, hideAllParts:this.hideAllParts,
