@@ -100,6 +100,9 @@
       <button onClick="{{ setEyedropper }}" title="Eyedropper (I)" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #34383f;border-radius:10px;cursor:pointer;background:transparent;{{ eyedropperBtn }}">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 1-4 11-11 3 3L6 21l-4 1Z"></path><path d="m14 6 2-2 4 4-2 2"></path></svg>
       </button>
+      <button onClick="{{ setFill }}" title="Fill (G)" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #34383f;border-radius:10px;cursor:pointer;background:transparent;{{ fillBtn }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"></path><path d="m5 2 5 5"></path><path d="M2 13h15"></path><path d="M21.5 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4Z"></path></svg>
+      </button>
       <div style="{{ dividerStyle }}"></div>
       <button onClick="{{ toggleMirror }}" title="Mirror L/R (M)" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid #34383f;border-radius:10px;cursor:pointer;background:transparent;{{ mirrorBtn }}">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="m16 8 4 4-4 4"></path><path d="M8 8 4 12l4 4"></path></svg>
@@ -327,7 +330,7 @@ class Component extends DCLogic {
       {TL:[x0,y1,z0],TR:[x0,y1,z1],BL:[x0,y0,z0],BR:[x0,y0,z1],normal:[-1,0,0],rect:R.right},
       {TL:[x1,y1,z1],TR:[x1,y1,z0],BL:[x1,y0,z1],BR:[x1,y0,z0],normal:[1,0,0],rect:R.left},
       {TL:[x0,y1,z0],TR:[x1,y1,z0],BL:[x0,y1,z1],BR:[x1,y1,z1],normal:[0,1,0],rect:R.top},
-      {TL:[x0,y0,z1],TR:[x1,y0,z1],BL:[x0,y0,z0],BR:[x1,y0,z0],normal:[0,-1,0],rect:R.bottom}
+      {TL:[x0,y0,z0],TR:[x1,y0,z0],BL:[x0,y0,z1],BR:[x1,y0,z1],normal:[0,-1,0],rect:R.bottom}
     ];
   }
   bilerp(TL,TR,BL,BR,fx,fy){
@@ -680,6 +683,7 @@ class Component extends DCLogic {
     const hit=this.getHit(e);
     if(!hit){ this.startOrbit(e); return; }
     if(this.state.tool==='eyedropper'){ this.pickColor(hit); return; }
+    if(this.state.tool==='fill'){ this.fillAt(hit); return; }
     this.stroking=true; this.lastIdx=-1; this.paintedAny=false; this.applyHit(hit);
   };
   startOrbit(e){ this.orbiting=true; this._lx=e.clientX; this._ly=e.clientY; }
@@ -720,6 +724,36 @@ class Component extends DCLogic {
     const x=this.texCtx;
     if(this.state.tool==='eraser'){ x.clearRect(px,py,1,1); }
     else { x.fillStyle=this.brushColor; x.clearRect(px,py,1,1); x.fillRect(px,py,1,1); }
+  }
+  hexToRgb(hex){ const n=parseInt(hex.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+  fillAt(hit){
+    const [px,py]=this.texelOf(hit.uv);
+    const img=this.texCtx.getImageData(0,0,64,64);
+    let changed=this.floodFill(img.data,px,py);
+    if(this.state.mirror){ const m=this.mirrorMap[py*64+px]; if(m>=0) changed=this.floodFill(img.data,m%64,Math.floor(m/64))||changed; }
+    if(!changed) return;
+    this.texCtx.putImageData(img,0,0);
+    this.texture.needsUpdate=true; this.drawPreview(); this.pushHistory();
+  }
+  // 4-connected flood fill of the contiguous same-colour region at (sx,sy)
+  floodFill(d,sx,sy){
+    const si=(sy*64+sx)*4;
+    const tr=d[si],tg=d[si+1],tb=d[si+2],ta=d[si+3];
+    const [br,bg,bb]=this.hexToRgb(this.brushColor), ba=255;
+    if(tr===br&&tg===bg&&tb===bb&&ta===ba) return false;
+    const seen=new Uint8Array(4096), stack=[sy*64+sx]; let any=false;
+    while(stack.length){
+      const p=stack.pop(); if(seen[p]) continue; seen[p]=1;
+      const i=p*4;
+      if(d[i]!==tr||d[i+1]!==tg||d[i+2]!==tb||d[i+3]!==ta) continue;
+      d[i]=br; d[i+1]=bg; d[i+2]=bb; d[i+3]=ba; any=true;
+      const x=p&63, y=p>>6;
+      if(x>0) stack.push(p-1);
+      if(x<63) stack.push(p+1);
+      if(y>0) stack.push(p-64);
+      if(y<63) stack.push(p+64);
+    }
+    return any;
   }
   pickColor(hit){
     const [px,py]=this.texelOf(hit.uv);
@@ -790,6 +824,7 @@ class Component extends DCLogic {
   setPencil=()=>this.setTool('pencil');
   setEraser=()=>this.setTool('eraser');
   setEyedropper=()=>this.setTool('eyedropper');
+  setFill=()=>this.setTool('fill');
   setRotate=()=>this.setTool('rotate');
   toggleMirror=()=>this.setState(s=>({mirror:!s.mirror}));
   toggleAutoRotate=()=>this.setState(s=>({autoRotate:!s.autoRotate}));
@@ -908,7 +943,8 @@ class Component extends DCLogic {
     if(e.ctrlKey||e.metaKey) return;
     const k=e.key.toLowerCase();
     if(k==='b') this.setPencil(); else if(k==='e') this.setEraser();
-    else if(k==='i') this.setEyedropper(); else if(k==='r') this.setRotate();
+    else if(k==='i') this.setEyedropper(); else if(k==='g') this.setFill();
+    else if(k==='r') this.setRotate();
     else if(k==='m') this.toggleMirror();
   };
 
@@ -961,7 +997,7 @@ class Component extends DCLogic {
       recent:mk(s.recent),
       hasRecent:s.recent.length>0,
       onCustomColor:this.onCustomColor,
-      setPencil:this.setPencil, setEraser:this.setEraser, setEyedropper:this.setEyedropper,
+      setPencil:this.setPencil, setEraser:this.setEraser, setEyedropper:this.setEyedropper, setFill:this.setFill,
       setRotate:this.setRotate, toggleMirror:this.toggleMirror, toggleAutoRotate:this.toggleAutoRotate,
       resetView:this.resetView, undo:this.undo, redo:this.redo, exportPNG:this.exportPNG,
       importRef:this.importRef, importSkin:this.importSkin, onImportFile:this.onImportFile,
@@ -982,7 +1018,7 @@ class Component extends DCLogic {
         : 'flex:1;position:relative;min-height:0;',
       railStyle, rightStyle, dividerStyle,
       pencilBtn:actv(s.tool==='pencil'), eraserBtn:actv(s.tool==='eraser'),
-      eyedropperBtn:actv(s.tool==='eyedropper'), rotateBtn:actv(s.tool==='rotate'),
+      eyedropperBtn:actv(s.tool==='eyedropper'), fillBtn:actv(s.tool==='fill'), rotateBtn:actv(s.tool==='rotate'),
       mirrorBtn:actv(s.mirror), autoBtn:actv(s.autoRotate),
       undoBtn: s.canUndo?'opacity:1;':'opacity:.35;pointer-events:none;',
       redoBtn: s.canRedo?'opacity:1;':'opacity:.35;pointer-events:none;',
