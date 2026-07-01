@@ -20,12 +20,14 @@
   ::-webkit-scrollbar-thumb{background:#34383f;border-radius:5px;}
   ::-webkit-scrollbar-track{background:transparent;}
   button{font-family:inherit;outline:none;}
+  header{overflow-x:auto;overflow-y:hidden;}
+  header::-webkit-scrollbar{height:0;display:none;}
   @keyframes sf-spin{to{transform:rotate(360deg);}}
 </style>
 </helmet>
 <div style="height:100vh;display:flex;flex-direction:column;background:#16171a;color:#e7e8ea;overflow:hidden;">
 
-  <header style="display:flex;align-items:center;gap:14px;height:54px;padding:0 16px;background:#1d1f23;border-bottom:1px solid #34383f;flex-shrink:0;z-index:10;">
+  <header style="display:flex;align-items:center;gap:10px;height:54px;padding:0 14px;background:#1d1f23;border-bottom:1px solid #34383f;flex-shrink:0;z-index:10;">
     <div style="display:flex;align-items:center;gap:10px;">
       <svg width="26" height="26" viewBox="0 0 32 32" style="display:block;">
         <polygon points="16,3 28,9.5 16,16 4,9.5" fill="{{ accent }}"></polygon>
@@ -69,11 +71,6 @@
       <button onClick="{{ setLayoutStudio }}" style="height:26px;padding:0 11px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:12px;{{ studioBtn }}">Studio</button>
       <button onClick="{{ setLayoutCompact }}" style="height:26px;padding:0 11px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:12px;{{ compactBtn }}">Compact</button>
     </div>
-
-    <button onClick="{{ exportPNG }}" style="display:flex;align-items:center;gap:7px;height:32px;padding:0 14px;border-radius:8px;border:none;background:{{ accent }};color:#0e1410;font-weight:700;font-size:12.5px;cursor:pointer;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
-      Export PNG
-    </button>
   </header>
 
   <div style="{{ mainStyle }}">
@@ -106,10 +103,23 @@
 
     <div ref="{{ viewportRef }}" style="flex:1;position:relative;min-width:0;background:radial-gradient(circle at 50% 36%, #23262c 0%, #15161a 72%);overflow:hidden;">
       <div ref="{{ statusRef }}" style="position:absolute;left:16px;bottom:14px;z-index:4;font-family:'Space Mono',monospace;font-size:11.5px;color:#cdd1d6;background:rgba(22,23,26,.72);backdrop-filter:blur(6px);border:1px solid #34383f;border-radius:8px;padding:6px 11px;pointer-events:none;">Hover the model to paint</div>
-      <div style="position:absolute;right:16px;bottom:14px;z-index:4;font-family:'Space Mono',monospace;font-size:10.5px;color:#6b7178;pointer-events:none;text-align:right;">drag empty space&nbsp;·&nbsp;orbit<br>scroll&nbsp;·&nbsp;zoom</div>
+      <div style="position:absolute;right:16px;bottom:14px;z-index:4;font-family:'Space Mono',monospace;font-size:10.5px;color:#6b7178;pointer-events:none;text-align:right;">drag empty space&nbsp;·&nbsp;orbit<br>scroll&nbsp;·&nbsp;zoom<br>drop a PNG&nbsp;·&nbsp;import</div>
     </div>
 
     <aside style="{{ rightStyle }}">
+      <div style="display:flex;flex-direction:column;gap:9px;padding:15px 15px 15px;background:#202327;border-bottom:1px solid #2a2d33;">
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:#6b7178;">Skin file</span>
+        <button onClick="{{ importSkin }}" title="Import a skin PNG (64×64 or legacy 64×32) — or drag one onto the window. Grab skins from a site like The Skindex." style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;height:46px;border-radius:11px;border:none;background:{{ accent }};color:#0e1410;font-weight:700;font-size:14.5px;letter-spacing:.2px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.32);">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M17 8l-5-5-5 5"></path><path d="M12 3v12"></path></svg>
+          Import skin
+        </button>
+        <input type="file" ref="{{ importRef }}" accept="image/png,image/*" onChange="{{ onImportFile }}" style="display:none;"></input>
+        <button onClick="{{ exportPNG }}" title="Export the current skin as a 64×64 PNG" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:38px;border-radius:9px;border:1px solid #34383f;background:#25282d;color:#cdd1d6;font-weight:600;font-size:13px;cursor:pointer;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+          Export PNG
+        </button>
+      </div>
+
       <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 15px 10px;">
         <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:#6b7178;">Color</span>
         <label style="position:relative;display:flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:7px;border:1px solid #34383f;background:#25282d;color:#cdd1d6;font-size:11.5px;cursor:pointer;">
@@ -123,7 +133,6 @@
         <div style="width:46px;height:46px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:{{ color }};flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.3);"></div>
         <div>
           <div style="font-family:'Space Mono',monospace;font-size:14px;color:#e7e8ea;text-transform:uppercase;">{{ color }}</div>
-          <div style="font-size:11px;color:#6b7178;margin-top:2px;">active brush</div>
         </div>
       </div>
 
@@ -149,7 +158,7 @@
       <div style="padding:14px 15px 8px;">
         <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:#6b7178;">Layers</span>
       </div>
-      <div style="padding:0 12px 6px;display:flex;flex-direction:column;gap:5px;">
+      <div style="padding:0 12px 14px;display:flex;flex-direction:column;gap:5px;">
         <div style="display:flex;align-items:center;gap:9px;border-radius:9px;padding:8px 10px;{{ overlayRowStyle }}">
           <button onClick="{{ toggleOverlayVis }}" title="Toggle visibility" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;color:#cdd1d6;opacity:{{ overlayEyeOpacity }};">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -163,7 +172,6 @@
           <button onClick="{{ selectBase }}" style="flex:1;text-align:left;border:none;background:transparent;cursor:pointer;color:#e7e8ea;font-size:13px;padding:0;">Base <span style="color:#6b7178;font-size:11px;">· skin</span></button>
         </div>
       </div>
-      <div style="padding:2px 15px 14px;font-size:11px;color:#6b7178;line-height:1.45;">Paint targets the selected layer. The overlay is the outer shell (hat, jacket, sleeves).</div>
 
       <div style="height:1px;background:#2a2d33;"></div>
 
@@ -174,12 +182,20 @@
           <button onClick="{{ hideAllParts }}" style="height:24px;padding:0 9px;border-radius:6px;border:1px solid #34383f;background:#25282d;color:#9aa0a8;font-size:11px;cursor:pointer;">None</button>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 15px 8px;">
-        <sc-for list="{{ partRows }}" as="pt" hint-placeholder-count="6">
-          <button onClick="{{ pt.onToggle }}" title="Toggle part visibility" style="display:flex;align-items:center;justify-content:center;height:34px;border-radius:8px;cursor:pointer;font-size:11.5px;{{ pt.style }}">{{ pt.label }}</button>
-        </sc-for>
+      <div style="display:flex;justify-content:center;padding:8px 15px 14px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <button onClick="{{ headPart.onToggle }}" title="{{ headPart.title }}" style="width:38px;height:38px;border-radius:4px;padding:0;cursor:pointer;transition:opacity .12s,background .12s,border-color .12s;{{ headPart.style }}"></button>
+          <div style="display:flex;gap:4px;align-items:flex-start;">
+            <button onClick="{{ rightArmPart.onToggle }}" title="{{ rightArmPart.title }}" style="width:17px;height:54px;border-radius:4px;padding:0;cursor:pointer;transition:opacity .12s,background .12s,border-color .12s;{{ rightArmPart.style }}"></button>
+            <button onClick="{{ bodyPart.onToggle }}" title="{{ bodyPart.title }}" style="width:38px;height:54px;border-radius:4px;padding:0;cursor:pointer;transition:opacity .12s,background .12s,border-color .12s;{{ bodyPart.style }}"></button>
+            <button onClick="{{ leftArmPart.onToggle }}" title="{{ leftArmPart.title }}" style="width:17px;height:54px;border-radius:4px;padding:0;cursor:pointer;transition:opacity .12s,background .12s,border-color .12s;{{ leftArmPart.style }}"></button>
+          </div>
+          <div style="display:flex;gap:4px;">
+            <button onClick="{{ rightLegPart.onToggle }}" title="{{ rightLegPart.title }}" style="width:17px;height:52px;border-radius:4px;padding:0;cursor:pointer;transition:opacity .12s,background .12s,border-color .12s;{{ rightLegPart.style }}"></button>
+            <button onClick="{{ leftLegPart.onToggle }}" title="{{ leftLegPart.title }}" style="width:17px;height:52px;border-radius:4px;padding:0;cursor:pointer;transition:opacity .12s,background .12s,border-color .12s;{{ leftLegPart.style }}"></button>
+          </div>
+        </div>
       </div>
-      <div style="padding:2px 15px 16px;font-size:11px;color:#6b7178;line-height:1.45;">Hide parts to reach faces tucked behind arms, legs, or the head, then show them again when you're done.</div>
 
       <div style="height:1px;background:#2a2d33;"></div>
 
@@ -190,11 +206,20 @@
         <div style="border-radius:9px;overflow:hidden;border:1px solid #34383f;background-color:#2a2d33;background-image:linear-gradient(45deg,#23262b 25%,transparent 25%),linear-gradient(-45deg,#23262b 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#23262b 75%),linear-gradient(-45deg,transparent 75%,#23262b 75%);background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;">
           <canvas ref="{{ previewRef }}" width="64" height="64" style="display:block;width:100%;image-rendering:pixelated;"></canvas>
         </div>
-        <div style="font-family:'Space Mono',monospace;font-size:10.5px;color:#6b7178;margin-top:8px;text-align:right;">64 × 64 px</div>
       </div>
     </aside>
 
   </div>
+
+  <sc-if value="{{ dragOver }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(14,16,20,.74);backdrop-filter:blur(3px);pointer-events:none;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:34px 48px;border-radius:18px;border:2px dashed {{ accent }};background:rgba(29,31,35,.92);box-shadow:0 20px 50px rgba(0,0,0,.55);">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="{{ accent }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M17 8l-5-5-5 5"></path><path d="M12 3v12"></path></svg>
+        <div style="font-family:'Space Mono',monospace;font-size:15px;color:#e7e8ea;letter-spacing:.3px;">Drop to import skin</div>
+        <div style="font-size:12px;color:#9aa0a8;">64×64 or legacy 64×32 PNG</div>
+      </div>
+    </div>
+  </sc-if>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#666b67&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;accentMid&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#6a328f&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;accentDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#3b3f3c&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;defaultLayout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;studio&quot;,&quot;compact&quot;],&quot;default&quot;:&quot;studio&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;autoSpin&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
@@ -204,6 +229,7 @@ class Component extends DCLogic {
     this.viewportRef = React.createRef();
     this.statusRef = React.createRef();
     this.previewRef = React.createRef();
+    this.importRef = React.createRef();
 
     this.PALETTE = [
       '#000000','#3b3b3f','#6b7178','#9aa0a8','#d6d9dd','#ffffff',
@@ -236,12 +262,20 @@ class Component extends DCLogic {
       overlayVisible:true,
       parts:{head:true,body:true,rightArm:true,leftArm:true,rightLeg:true,leftLeg:true},
       canUndo:false,
-      canRedo:false
+      canRedo:false,
+      dragOver:false
     };
     this.brushColor = this.state.color;
   }
 
-  componentDidMount(){ this.waitThree(); window.addEventListener('resize', this.onResize); window.addEventListener('keydown', this.onKey); }
+  componentDidMount(){
+    this.waitThree();
+    window.addEventListener('resize', this.onResize);
+    window.addEventListener('keydown', this.onKey);
+    window.addEventListener('dragover', this.onDragOver);
+    window.addEventListener('dragleave', this.onDragLeave);
+    window.addEventListener('drop', this.onDrop);
+  }
   componentDidUpdate(){
     if(this.renderer && this.viewportRef.current && this.renderer.domElement.parentNode !== this.viewportRef.current){
       this.viewportRef.current.appendChild(this.renderer.domElement);
@@ -254,6 +288,9 @@ class Component extends DCLogic {
     if(this._ro) this._ro.disconnect();
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('keydown', this.onKey);
+    window.removeEventListener('dragover', this.onDragOver);
+    window.removeEventListener('dragleave', this.onDragLeave);
+    window.removeEventListener('drop', this.onDrop);
     if(this.renderer) this.renderer.dispose();
   }
 
@@ -363,6 +400,25 @@ class Component extends DCLogic {
   shade(hex,f){ const n=parseInt(hex.slice(1),16); const c=v=>Math.max(0,Math.min(255,Math.round(v*f))); const r=c((n>>16)&255),g=c((n>>8)&255),b=c(n&255); return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1); }
   fillShaded(R,base){ this.fillFace(R.front,base); this.fillFace(R.back,this.shade(base,.86)); this.fillFace(R.left,this.shade(base,.92)); this.fillFace(R.right,this.shade(base,.92)); this.fillFace(R.top,this.shade(base,1.08)); this.fillFace(R.bottom,this.shade(base,.74)); }
 
+  drawMystery(){
+    const x=this.texCtx;
+    x.clearRect(0,0,64,64);
+    const base='#18181b'; // reads as black but keeps the model visible against the dark viewport
+    const H=this.partRects(0,0,8,8,8);
+    const parts=[
+      H,                              // head
+      this.partRects(16,16,8,12,4),   // body
+      this.partRects(40,16,4,12,4),   // right arm
+      this.partRects(32,48,4,12,4),   // left arm
+      this.partRects(0,16,4,12,4),    // right leg
+      this.partRects(16,48,4,12,4)    // left leg
+    ];
+    for(const R of parts) this.fillShaded(R,base);
+    // white "?" on the face (5×7 glyph)
+    const Q=[[1,[3,4,5]],[2,[2,6]],[3,[6]],[4,[4,5]],[5,[4]],[7,[4]]];
+    for(const row of Q){ for(const cx of row[1]) this.fillSub(H.front,cx,row[0],1,1,'#f2f2f4'); }
+  }
+
   drawStarter(type){
     const p=this.PAL[type]||this.PAL.classic;
     const aw = type==='slim'?3:4;
@@ -428,7 +484,7 @@ class Component extends DCLogic {
     const T=window.THREE;
     this.texCanvas=document.createElement('canvas'); this.texCanvas.width=64; this.texCanvas.height=64;
     this.texCtx=this.texCanvas.getContext('2d');
-    this.drawStarter('classic');
+    this.drawMystery();
 
     this.scene=new T.Scene();
     this.camera=new T.PerspectiveCamera(42,1,0.1,2000);
@@ -654,6 +710,89 @@ class Component extends DCLogic {
     a.href=this.texCanvas.toDataURL('image/png'); a.click();
   };
 
+  /* ---------- import ---------- */
+  importSkin=()=>{ if(this.importRef.current) this.importRef.current.click(); };
+  onImportFile=(e)=>{
+    const file=e.target.files && e.target.files[0];
+    e.target.value=''; // let the same file be re-picked later
+    this.loadFile(file);
+  };
+  loadFile(file){
+    if(!file) return;
+    if(file.type && file.type.indexOf('image')!==0){ this.setStatus('That file is not an image'); return; }
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{ URL.revokeObjectURL(url); this.loadImageToTexture(img); };
+    img.onerror=()=>{ URL.revokeObjectURL(url); this.setStatus("Couldn't read that image"); };
+    img.src=url;
+  }
+  hasFiles(e){ const t=e.dataTransfer&&e.dataTransfer.types; return t&&(Array.from(t).indexOf('Files')>=0); }
+  onDragOver=(e)=>{
+    if(!this.hasFiles(e)) return;
+    e.preventDefault();
+    if(e.dataTransfer) e.dataTransfer.dropEffect='copy';
+    if(!this.state.dragOver) this.setState({dragOver:true});
+  };
+  onDragLeave=(e)=>{
+    // only clear when the cursor actually leaves the window
+    if(e.relatedTarget===null || e.clientX<=0 || e.clientY<=0 || e.clientX>=window.innerWidth || e.clientY>=window.innerHeight){
+      if(this.state.dragOver) this.setState({dragOver:false});
+    }
+  };
+  onDrop=(e)=>{
+    if(!this.hasFiles(e)) return;
+    e.preventDefault();
+    if(this.state.dragOver) this.setState({dragOver:false});
+    const file=e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    this.loadFile(file);
+  };
+  loadImageToTexture(img){
+    const w=img.width, h=img.height;
+    // Accept square skins (64/128/256…) and legacy 64×32 (or any 2:1). Anything
+    // else is scaled to fit so it still lands on the model.
+    const legacy = w===2*h;
+    const x=this.texCtx;
+    x.imageSmoothingEnabled=false;
+    x.clearRect(0,0,64,64);
+    if(legacy){
+      x.drawImage(img,0,0,w,h,0,0,64,32);   // top half holds every legacy face
+      this.convertLegacy();                  // mirror right limbs onto the new left slots
+    } else {
+      x.drawImage(img,0,0,w,h,0,0,64,64);    // square: down/upscale to 64×64
+    }
+    this.texture.needsUpdate=true;
+    this.initHistory(); this.drawPreview();
+    // initHistory's setState re-renders and resets the status div to its
+    // template text, so post the confirmation after that flush.
+    const msg='Imported '+(legacy?'legacy 64×32':w+'×'+h)+' skin';
+    setTimeout(()=>this.setStatus(msg),0);
+  }
+  // Legacy 64×32 skins only store the right arm/leg; the 64×64 layout adds
+  // separate left-limb regions. Copy each right-limb face to its left slot,
+  // flipped horizontally — matches the standard Minecraft conversion.
+  convertLegacy(){
+    const c=[
+      [4,16,4,4,20,48],  [8,16,4,4,24,48],   // right leg: top, bottom
+      [0,20,4,12,24,52], [4,20,4,12,20,52],  // right leg: outer, front
+      [8,20,4,12,16,52], [12,20,4,12,28,52], // right leg: inner, back
+      [44,16,4,4,36,48], [48,16,4,4,40,48],  // right arm: top, bottom
+      [40,20,4,12,40,52],[44,20,4,12,36,52], // right arm: outer, front
+      [48,20,4,12,32,52],[52,20,4,12,44,52]  // right arm: inner, back
+    ];
+    for(const r of c) this.copyTexRegion(r[0],r[1],r[2],r[3],r[4],r[5],true);
+  }
+  copyTexRegion(sx,sy,w,h,dx,dy,flip){
+    const tmp=document.createElement('canvas'); tmp.width=w; tmp.height=h;
+    tmp.getContext('2d').drawImage(this.texCanvas,sx,sy,w,h,0,0,w,h);
+    const x=this.texCtx;
+    x.save();
+    x.clearRect(dx,dy,w,h);
+    if(flip){ x.translate(dx+w,dy); x.scale(-1,1); x.drawImage(tmp,0,0); }
+    else { x.drawImage(tmp,dx,dy); }
+    x.restore();
+  }
+  setStatus(msg){ if(this.statusRef.current) this.statusRef.current.textContent=msg; }
+
   onKey=(e)=>{
     if(e.target && (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')) return;
     if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); e.shiftKey?this.redo():this.undo(); return; }
@@ -692,8 +831,10 @@ class Component extends DCLogic {
 
     const mk=(arr)=>arr.map(h=>({hex:h,onPick:()=>this.setColor(h)}));
 
-    const PARTS=[['head','Head'],['body','Body'],['rightArm','R Arm'],['leftArm','L Arm'],['rightLeg','R Leg'],['leftLeg','L Leg']];
-    const partRows=PARTS.map(pp=>{ const on=s.parts[pp[0]]; return { label:pp[1], onToggle:()=>this.togglePart(pp[0]), style: on?'background:#25282d;color:#cdd1d6;border:1px solid #3a3e45;':'background:#191b1f;color:#5b6168;border:1px dashed #3a3e45;' }; });
+    const pfStyle=(on)=> on
+      ? 'background:#41464f;border:1.5px solid '+accent+';box-shadow:inset 0 2px 0 rgba(255,255,255,.06),inset 0 -3px 0 rgba(0,0,0,.2);opacity:1;'
+      : 'background:rgba(255,255,255,.02);border:1.5px dashed #3a3e45;opacity:.45;';
+    const pf=(name,label)=>{ const on=s.parts[name]; return { onToggle:()=>this.togglePart(name), style:pfStyle(on), title:label+(on?' — shown (click to hide)':' — hidden (click to show)') }; };
 
     return {
       viewportRef:this.viewportRef, statusRef:this.statusRef, previewRef:this.previewRef,
@@ -706,11 +847,16 @@ class Component extends DCLogic {
       setPencil:this.setPencil, setEraser:this.setEraser, setEyedropper:this.setEyedropper,
       setRotate:this.setRotate, toggleMirror:this.toggleMirror, toggleAutoRotate:this.toggleAutoRotate,
       resetView:this.resetView, undo:this.undo, redo:this.redo, exportPNG:this.exportPNG,
+      importRef:this.importRef, importSkin:this.importSkin, onImportFile:this.onImportFile,
+      dragOver:s.dragOver,
       setModelClassic:this.setModelClassic, setModelSlim:this.setModelSlim,
       loadClassic:this.loadClassic, loadSlim:this.loadSlim, loadBlank:this.loadBlank,
       selectBase:this.selectBase, selectOverlay:this.selectOverlay,
       toggleBaseVis:this.toggleBaseVis, toggleOverlayVis:this.toggleOverlayVis,
-      togglePart:this.togglePart, showAllParts:this.showAllParts, hideAllParts:this.hideAllParts, partRows,
+      togglePart:this.togglePart, showAllParts:this.showAllParts, hideAllParts:this.hideAllParts,
+      headPart:pf('head','Head'), bodyPart:pf('body','Body'),
+      rightArmPart:pf('rightArm','Right arm'), leftArmPart:pf('leftArm','Left arm'),
+      rightLegPart:pf('rightLeg','Right leg'), leftLegPart:pf('leftLeg','Left leg'),
       setLayoutStudio:this.setLayoutStudio, setLayoutCompact:this.setLayoutCompact,
       mainStyle: studio
         ? 'flex:1;display:flex;min-height:0;'
