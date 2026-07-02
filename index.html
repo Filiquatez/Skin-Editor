@@ -271,7 +271,7 @@ class Component extends DCLogic {
       tool:'pencil',
       color:'#c68642',
       recent:[],
-      model:'classic',
+      model:'slim',
       mirror:false,
       autoRotate: !!props.autoSpin,
       layout: props.defaultLayout || 'studio',
@@ -438,95 +438,19 @@ class Component extends DCLogic {
     for(const row of Q){ for(const cx of row[1]) this.fillSub(H.front,cx,row[0],1,1,'#f2f2f4'); }
   }
 
-  // Blank-slate base skin: neutral skin tone, minimal clothes (shorts + a simple
-  // top), differentiated male/female by hair, face and top cut. Ready to customize.
-  drawBase(gender, model){
-    const female = gender==='female';
-    const aw = model==='slim'?3:4;
-    const x=this.texCtx; x.clearRect(0,0,64,64);
-    const skin='#d7ad86', hair=female?'#5a3a20':'#33241a';
-    const top='#c3c8cf', shorts='#5f6570';
-    const sh=(c,f)=>this.shade(c,f);
-
-    const H=this.partRects(0,0,8,8,8);
-    const B=this.partRects(16,16,8,12,4);
-    const RA=this.partRects(40,16,aw,12,4), LA=this.partRects(32,48,aw,12,4);
-    const RL=this.partRects(0,16,4,12,4),  LL=this.partRects(16,48,4,12,4);
-
-    // HEAD — skin, hair, face
-    this.fillShaded(H,skin);
-    this.fillFace(H.top,hair); this.fillFace(H.back,sh(hair,.9));
-    this.fillSub(H.front,0,0,8,2,hair);
-    this.fillSub(H.front,0,2,1,1,hair); this.fillSub(H.front,7,2,1,1,hair);
-    if(female){
-      // long hair: down the sides and framing the face
-      this.fillSub(H.right,0,0,8,8,sh(hair,.92)); this.fillSub(H.left,0,0,8,8,sh(hair,.92));
-      this.fillSub(H.front,0,2,1,6,hair); this.fillSub(H.front,7,2,1,6,hair);
-    } else {
-      this.fillSub(H.right,0,0,8,3,sh(hair,.92)); this.fillSub(H.left,0,0,8,3,sh(hair,.92));
-    }
-    // face
-    const brow=sh(hair,.8);
-    this.fillSub(H.front,1,2,2,1,brow); this.fillSub(H.front,5,2,2,1,brow);
-    this.fillSub(H.front,1,3,2,2,'#e6e9ec'); this.fillSub(H.front,5,3,2,2,'#e6e9ec');
-    const eye=female?'#6a4a8a':'#4a3320';
-    this.fillSub(H.front,2,3,1,2,eye); this.fillSub(H.front,5,3,1,2,eye);
-    if(female){ this.fillSub(H.front,1,3,1,1,'#2a1b10'); this.fillSub(H.front,6,3,1,1,'#2a1b10'); }
-    this.fillSub(H.front,3,5,2,1,sh(skin,.82)); // nose
-    this.fillSub(H.front,2,6,4,1,female?'#b5615f':sh(skin,.7)); // mouth / lips
-
-    // BODY — skin, then top and shorts
-    this.fillShaded(B,skin);
-    if(female){
-      // tank top: torso covered, thin shoulder straps
-      this.fillSub(B.front,0,2,8,10,top);
-      this.fillSub(B.front,1,0,1,2,top); this.fillSub(B.front,6,0,1,2,top);
-      this.fillSub(B.back,0,0,8,12,sh(top,.86));
-      this.fillSub(B.left,0,0,4,12,sh(top,.92)); this.fillSub(B.right,0,0,4,12,sh(top,.92));
-      this.fillSub(B.front,1,4,2,1,sh(top,1.07)); this.fillSub(B.front,5,4,2,1,sh(top,1.07)); // subtle form
-      this.fillSub(B.front,2,5,1,1,sh(top,.9)); this.fillSub(B.front,5,5,1,1,sh(top,.9));
-    } else {
-      this.fillFace(B.front,top); this.fillFace(B.back,sh(top,.86));
-      this.fillFace(B.left,sh(top,.92)); this.fillFace(B.right,sh(top,.92));
-      this.fillSub(B.front,1,3,2,1,sh(top,.9)); this.fillSub(B.front,5,3,2,1,sh(top,.9)); // faint chest line
-    }
-    // shorts (waistband over lower torso)
-    this.fillSub(B.front,0,9,8,3,shorts); this.fillSub(B.back,0,9,8,3,sh(shorts,.86));
-    this.fillSub(B.left,0,9,4,3,sh(shorts,.92)); this.fillSub(B.right,0,9,4,3,sh(shorts,.92));
-
-    // ARMS — skin; male tee adds a short sleeve cap
-    const arm=(A)=>{
-      this.fillShaded(A,skin);
-      if(!female){
-        this.fillFace(A.top,top);
-        this.fillSub(A.front,0,0,A.front[2],3,top);
-        this.fillSub(A.back,0,0,A.back[2],3,sh(top,.86));
-        this.fillSub(A.left,0,0,A.left[2],3,sh(top,.92));
-        this.fillSub(A.right,0,0,A.right[2],3,sh(top,.92));
-      }
-    };
-    arm(RA); arm(LA);
-
-    // LEGS — skin, shorts over the upper leg, hint of foot at the base
-    const leg=(L)=>{
-      this.fillShaded(L,skin);
-      this.fillSub(L.front,0,0,4,4,shorts); this.fillSub(L.back,0,0,4,4,sh(shorts,.86));
-      this.fillSub(L.left,0,0,4,4,sh(shorts,.92)); this.fillSub(L.right,0,0,4,4,sh(shorts,.92));
-      this.fillFace(L.bottom,sh(skin,.78));
-    };
-    leg(RL); leg(LL);
-  }
-
-  applyBase(gender, model){
-    this.drawBase(gender, model);
-    this.texture.needsUpdate=true;
-    this.initHistory(); this.drawPreview();
+  // Load a bundled preset PNG (same-origin, so the canvas stays untainted) and
+  // switch the rig to match the skin's arm width.
+  loadPreset(file, model){
     if(model!==this.state.model){ this.setState({model},()=>this.rebuildModel()); }
+    const img=new Image();
+    img.onload=()=>this.loadImageToTexture(img);
+    img.onerror=()=>this.setStatus("Couldn't load "+file);
+    img.src=file;
   }
-  loadClassicMale=()=>this.applyBase('male','classic');
-  loadClassicFemale=()=>this.applyBase('female','classic');
-  loadSlimMale=()=>this.applyBase('male','slim');
-  loadSlimFemale=()=>this.applyBase('female','slim');
+  loadClassicMale=()=>this.loadPreset('Male-wide.png','classic');
+  loadClassicFemale=()=>this.loadPreset('Female-wide.png','classic');
+  loadSlimMale=()=>this.loadPreset('Male-slim.png','slim');
+  loadSlimFemale=()=>this.loadPreset('Female-slim.png','slim');
 
   drawStarter(type){
     const p=this.PAL[type]||this.PAL.classic;
@@ -631,6 +555,7 @@ class Component extends DCLogic {
 
     this.initHistory(); this.drawPreview();
     this.ensureObserver(); this.resize(); this.animate();
+    this.loadSlimFemale(); // default skin on load
   }
 
   ensureObserver(){
